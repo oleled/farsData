@@ -1,0 +1,84 @@
+---
+title: "farsData"
+author: "O.L."
+date: " 2023-02-06"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{farsData}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## The Data
+
+The Fars Package is primarily built for educational purposes. The package reads data from the US National Highway Traffic Safety Administration's (NHTSA) Fatality Analysis Reporting System (FARS), which is a nationwide census providing the American public yearly data regarding fatal injuries suffered in motor vehicle traffic crashes. The package enables one to explore fatal traffic accidents from 2013-2015. The function `fars_function` finds the relevant dataset, manipulates it and maps the places where accidents have occured.
+```{r setup}
+library(farsData)
+library('mapdata')
+library('lubridate')
+```
+
+## Package Dependencies
+
+The `farsdata` package imports packages - `readr`, `dplyr`, `tidyr`.
+It imports functions from packages - `maps`, `read_csv`, `points`.
+
+
+## Export Functions
+
+The `farsdata` package comprises of several functions:
+- `make_filename`
+- `fars_read_years`
+- `fars_summarize_years`
+- `fars_map_state`
+
+
+## Using the Package
+
+After importing the package, you can use the available functions -
+
+**1. `make_filename` **
+Reads the input year and finds the relevant dataset for that year. If the approriate year is not written, the sprintf function will return an error. It takes a numeric value of the year, used to find the relevant dataset. And, returns A character vector filename. BEWARE: re-installing the package may cause your data to be overridden
+
+```{r, eval=FALSE}
+fars_2014_fn <- make_filename(2014)
+fars_2014_fn
+```
+
+**2. `fars_read_years` **
+Reads the year and finds the csv file matching the same year. If the csv file is not found, 'invalid year' error is displayed.If the year is appropriate,  the csv file is read and mutate a new column with the year and then select the columns MONTH and year.A dataset with of the relevant year, with the columns MONTH and year is returned. Otherwise, an error 'invalid year' is displayed.
+
+If you wish to just look at fatality data for a a single year, use the `fars_read_years()` function with a single year as input. The only data columns selected are `MONTH` and `year`.  This returns a list of length one, and the first element in the list is the `tbl_df` (the `tidyverse` data frame) listing the month and year for each fatal accident.
+
+```{r, eval=FALSE}
+fars_3yrs <- fars_read_years(years = 2013:2015)
+fars_3yrs
+fars_2yrs <- fars_read_years(c(2013, 2014))
+fars_2yrs
+fars_2014 <- fars_read_years(years = 2014)
+fars_2014[[1]]
+```
+
+**3. `fars_summarize_years` **
+The function reads the years as a numeric input.The function will read all the csv files found in the directory, using the `fars_read_years` function and bind them row-wise. It will then group the data based on year and MONTH and summarize the data.
+
+```{r, eval=FALSE}
+fars_summary <- fars_summarize_years(c(2013, 2014))
+fars_summary
+fars_summary <- fars_summarize_years(2013:2015)
+fars_summary
+```
+
+**4. `fars_map_state` **
+This function takes the state number and the vector of years as input. It will then find the relevant csv files using the `make_filename` function and will read those csv files using the `fars_read` function. If the state number is not found it will display an error. Otherwise, it will filter the dataset, filtering the data with thegiven state number. It then plots the points where the accidents have occured in that state. If no accidents occured, a message is displayed.
+```{r mapping_crashes}
+fars_map_state(53, 2014)
+fars_map_state(36, 2014)
+```
